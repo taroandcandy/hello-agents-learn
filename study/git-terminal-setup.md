@@ -127,7 +127,36 @@ $env:POSH_THEME_NAME = 'agnoster-local'
 
 其中 `agnoster-local` 是基于官方 `agnoster` 的本地修正版，用来解决部分图标在当前终端字体下显示为空白的问题。
 
-## 5. 字体设置
+## 5. Git 提交状态提示
+
+已在 `agnoster-local` 主题的 Git segment 中加入当前仓库状态提示。
+
+主题文件位置：
+
+```powershell
+C:\Users\Lenovo\.config\oh-my-posh\themes\agnoster-local.omp.json
+```
+
+当前显示逻辑：
+
+```text
+branch OK clean        当前仓库没有未提交内容
+branch ! uncommitted   当前仓库有未提交内容
+```
+
+对应的 Oh My Posh Git segment template：
+
+```text
+{{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }} ! uncommitted{{ else }} OK clean{{ end }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}
+```
+
+修改后可通过下面命令立即重新加载：
+
+```powershell
+. $PROFILE
+```
+
+## 6. 字体设置
 
 为了让 `agnoster` 这类 Powerline / Nerd Font 主题正常显示，已设置终端字体为：
 
@@ -172,7 +201,7 @@ Windows Terminal 中的配置项：
 Ctrl + Shift + P -> Developer: Reload Window
 ```
 
-## 6. 常见问题
+## 7. 常见问题
 
 ### CONFIG NOT FOUND
 
@@ -215,7 +244,7 @@ try { Set-PSReadLineOption -PredictionSource History -ErrorAction Stop } catch {
 try { Set-PSReadLineOption -PredictionViewStyle ListView -ErrorAction Stop } catch {}
 ```
 
-## 7. 后续切换主题
+## 8. 后续切换主题
 
 打开 PowerShell profile：
 
