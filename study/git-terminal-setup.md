@@ -59,7 +59,7 @@ git config --global --add safe.directory D:/front/agent
 ```text
 posh-git        PowerShell Git 状态提示和 Git 补全
 Terminal-Icons  终端文件列表图标
-PSReadLine      命令历史预测和补全体验
+PSReadLine      命令行编辑体验；当前已关闭历史预测提示
 Oh My Posh      美化 prompt，并显示 Git 分支、状态、环境信息
 delta           美化 git diff
 lazygit         终端 Git 图形界面
@@ -100,18 +100,13 @@ git config --global merge.conflictstyle zdiff3
 C:\Users\Lenovo\.config\oh-my-posh\themes
 ```
 
-已下载过的主题：
+当前保留的主题：
 
 ```text
-catppuccin_mocha
-tokyonight_storm
-gruvbox
-pure
-slim
-clean-detailed
-agnoster
-agnoster-local
+M365Princess
 ```
+
+之前下载过的 `catppuccin_mocha`、`tokyonight_storm`、`gruvbox`、`pure`、`slim`、`clean-detailed`、`agnoster`、`agnoster-local`、`onehalf.minimal` 已清理删除。
 
 官方主题预览页：
 
@@ -122,19 +117,19 @@ https://ohmyposh.dev/docs/themes
 当前默认主题设置为：
 
 ```powershell
-$env:POSH_THEME_NAME = 'agnoster-local'
+$env:POSH_THEME_NAME = 'M365Princess'
 ```
 
-其中 `agnoster-local` 是基于官方 `agnoster` 的本地修正版，用来解决部分图标在当前终端字体下显示为空白的问题。
+当前正在使用 `M365Princess`。
 
 ## 5. Git 提交状态提示
 
-已在 `agnoster-local` 主题的 Git segment 中加入当前仓库状态提示。
+已在当前主题的 Git segment 中加入当前仓库状态提示。
 
 主题文件位置：
 
 ```powershell
-C:\Users\Lenovo\.config\oh-my-posh\themes\agnoster-local.omp.json
+C:\Users\Lenovo\.config\oh-my-posh\themes\M365Princess.omp.json
 ```
 
 当前显示逻辑：
@@ -144,11 +139,24 @@ branch OK clean        当前仓库没有未提交内容
 branch ! uncommitted   当前仓库有未提交内容
 ```
 
+注意：Oh My Posh 的 Git segment 需要开启 `fetch_status` 才会读取工作区和暂存区变更。否则即使 `git status` 显示有 modified 文件，prompt 也可能仍然显示 `OK clean`。
+
+当前已在 Git segment 中开启：
+
+```json
+"options": {
+  "fetch_status": true,
+  "fetch_upstream_icon": false
+}
+```
+
 对应的 Oh My Posh Git segment template：
 
 ```text
-{{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }} ! uncommitted{{ else }} OK clean{{ end }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}
+{{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }} ! uncommitted{{ else }} OK clean{{ end }}
 ```
+
+这里没有显示 `.BranchStatus`，因此 prompt 不会展示 `↑2` / `↓1` 这类本地分支领先或落后远程的提示。
 
 修改后可通过下面命令立即重新加载：
 
@@ -233,15 +241,14 @@ $env:POSH_THEMES_PATH = Join-Path $HOME '.config\oh-my-posh\themes'
 3. 如果仍有个别图标空白，使用本地修正版主题 agnoster-local。
 ```
 
-### PSReadLine 在非交互环境报错
+### 关闭终端输入预测提示
 
-PowerShell profile 中已把 PSReadLine 设置包进 `try/catch`，避免在非交互命令执行环境中刷错误。
+截图中右侧出现的 `[History]` 列表来自 PSReadLine 的预测功能。因为显示比较干扰，当前已在 PowerShell profile 中关闭。
 
 当前写法：
 
 ```powershell
-try { Set-PSReadLineOption -PredictionSource History -ErrorAction Stop } catch {}
-try { Set-PSReadLineOption -PredictionViewStyle ListView -ErrorAction Stop } catch {}
+try { Set-PSReadLineOption -PredictionSource None -ErrorAction Stop } catch {}
 ```
 
 ## 8. 后续切换主题
@@ -255,7 +262,7 @@ notepad $PROFILE
 修改这一行：
 
 ```powershell
-$env:POSH_THEME_NAME = 'agnoster-local'
+$env:POSH_THEME_NAME = 'M365Princess'
 ```
 
 例如切换成 `pure`：
