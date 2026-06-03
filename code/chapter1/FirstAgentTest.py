@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
+sys.stderr.reconfigure(encoding="utf-8")
 AGENT_SYSTEM_PROMPT = """
 你是一个智能旅行助手。你的任务是分析用户的请求，并使用可用工具一步步地解决问题。
 
@@ -59,7 +64,11 @@ def get_weather(city: str) -> str:
 
 
 import os
-from tavily import TavilyClient
+from dotenv import load_dotenv
+try:
+    from tavily import TavilyClient
+except ImportError:
+    from tavily import Client as TavilyClient
 
 def get_attraction(city: str, weather: str) -> str:
     """
@@ -109,6 +118,7 @@ available_tools = {
 }
 
 from openai import OpenAI
+import httpx
 
 class OpenAICompatibleClient:
     """
@@ -116,7 +126,11 @@ class OpenAICompatibleClient:
     """
     def __init__(self, model: str, api_key: str, base_url: str):
         self.model = model
-        self.client = OpenAI(api_key=api_key, base_url=base_url)
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            http_client=httpx.Client(trust_env=False),
+        )
 
     def generate(self, prompt: str, system_prompt: str) -> str:
         """调用LLM API来生成回应。"""
@@ -135,17 +149,31 @@ class OpenAICompatibleClient:
             print("大语言模型响应成功。")
             return answer
         except Exception as e:
-            print(f"调用LLM API时发生错误: {e}")
+            print(f"调用LLM API时发生错误: {type(e).__name__}: {e}")
             return "错误：调用语言模型服务时出错。"
 
 import re
 
 # --- 1. 配置LLM客户端 ---
-# 请根据您使用的服务，将这里替换成对应的凭证和地址
-API_KEY = "YOUR_API_KEY"
-BASE_URL = "YOUR_BASE_URL"
-MODEL_ID = "YOUR_MODEL_ID"
-os.environ['TAVILY_API_KEY'] = "YOUR_TAVILY_API_KEY"
+# 从项目根目录的 .env 文件读取配置
+load_dotenv()
+
+API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("API_KEY")
+BASE_URL = os.getenv("OPENAI_BASE_URL") or os.getenv("BASE_URL")
+MODEL_ID = os.getenv("OPENAI_MODEL") or os.getenv("MODEL_ID")
+
+missing_configs = [
+    name
+    for name, value in {
+        "OPENAI_API_KEY": API_KEY,
+        "OPENAI_BASE_URL": BASE_URL,
+        "OPENAI_MODEL": MODEL_ID,
+        "TAVILY_API_KEY": os.getenv("TAVILY_API_KEY"),
+    }.items()
+    if not value
+]
+if missing_configs:
+    raise ValueError(f"请先在 .env 中配置这些变量: {', '.join(missing_configs)}")
 
 llm = OpenAICompatibleClient(
     model=MODEL_ID,
